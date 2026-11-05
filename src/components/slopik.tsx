@@ -357,8 +357,8 @@ export default function Slopik() {
                       ? "/assets/logo.webp"
                       : "/assets/logo-static.webp"
                   }
-                  width="320"
-                  height="176"
+                  width="350"
+                  height="350"
                   alt="Slopik.pl"
                   fetchPriority="high"
                 />

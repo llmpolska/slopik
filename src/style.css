@@ -138,8 +138,8 @@ header {
 }
 .wordmark {
   display: block;
-  width: clamp(7.5rem, 13vw, 10rem);
-  aspect-ratio: 320 / 176;
+  width: clamp(5.5rem, min(35vw, 15.5dvh), 10rem);
+  aspect-ratio: 350 / 264;
   flex-shrink: 0;
   line-height: 0;
 }
@@ -148,7 +148,11 @@ header {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+}
+.wordmark img {
+  object-fit: cover;
+  /* Remove only the transparent padding shared by all twelve frames. */
+  object-position: center 34.883721%;
 }
 .header-right {
   display: flex;

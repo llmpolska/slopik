@@ -1,4 +1,5 @@
 async function verifyPolish(page) {
+  const origin = new URL(page.url()).origin;
   const assert = (value, message) => {
     if (!value) throw new Error(message);
   };
@@ -9,7 +10,7 @@ async function verifyPolish(page) {
   );
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("http://127.0.0.1:8787");
+  await page.goto(origin);
   await page.evaluate(() => localStorage.clear());
   await page.reload();
   await page.getByRole("textbox").fill("Czy to ma sens?");

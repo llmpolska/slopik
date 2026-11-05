@@ -35,15 +35,14 @@ export const HistorySchema = z
 export type HistoryEntry = z.infer<typeof HistorySchema>[number];
 export const lines = {
   verdict: {
-    yes: "Tak. Nosacz dał okejkę. Teraz już nie ma odwrotu.",
+    yes: "Tak. Daję okejkę. Tylko potem nie mów, że to był mój pomysł.",
     no: "Nie. Nawet moja Grażyna mówi, że nie. A ona kupiła air fryer na raty.",
     wait: "Prześpij się z tym. Najlepiej do następnej wypłaty.",
     risky: "Da się. Ale tak samo da się zjeść kebaba w białej koszuli.",
-    test: "Najpierw spróbuj na małą skalę. Titanic też miał za dużo pewności siebie.",
+    test: "Najpierw mały test. Jak się wysypie, to przynajmniej nie na weselu.",
     unclear:
-      "Nawet nosacz nie wie. Dopisz konkrety, bo z fusów po energetyku nie wywróżę.",
-    cosmic:
-      "Rada delfinów przyjęła wniosek. Polska krowa odtańczy procedurę. Proszę nie dotykać portalu.",
+      "Nawet ja nie wiem. Dopisz konkrety, bo z fusów po energetyku nie wywróżę.",
+    cosmic: "Kosmos zatwierdził. Ziemia wstrzymała się od głosu.",
     surreal:
       "To jest ten moment, w którym kebab zaczyna jeść ciebie. Miłego wtorku.",
     chaos:
@@ -55,16 +54,16 @@ export const lines = {
     simple: "Da się sprawdzić bez kredytu i prezentacji na 80 slajdów.",
     novel:
       "Przynajmniej nie jest to kolejna apka do picia wody. Szanuję odklejkę.",
-    useful: "Rozwiązuje prawdziwy problem. Nosacz aż zdjął okulary.",
+    useful: "Rozwiązuje prawdziwy problem. Aż zdjąłem okulary.",
     passion: "Jest w tym zajawka. Tego nie kupisz nawet w promce.",
   },
   flaw: {
     money:
       "Excel płacze. Ktoś musi za to zapłacić i oby to nie była twoja mama.",
     crowded:
-      "Konkurencja już tam jest. I ma budżet większy niż twój limit w Żabce.",
+      "Ktoś już to pewnie robi. I ma budżet większy niż twój paragon z Żabki.",
     execution:
-      "Pomysł jest. Teraz tylko ta drobnostka: zrobić, dowieźć i nie porzucić w środę.",
+      "Pomysł jest. Teraz tylko ta drobnostka: zrobić, dowieźć i nie spierdolić w środę.",
     demand: "Ty tego chcesz. Pytanie, czy chce tego ktokolwiek poza tobą.",
     risk: "Ryzyko wystaje bardziej niż mój nos. Sprawdź założenia, zanim odpalisz oszczędności.",
   },

@@ -11,7 +11,7 @@ Absurdalna polska wyrocznia AI. Zadajesz pytanie, wrzucasz pomysł albo obrazek,
 - Krótkie werdykty dla pytań i memiczne odpowiedzi na absurd.
 - Ocena pomysłu od 0 do 10, największa zaleta i wada.
 - Dodawanie obrazów przez plik, przeciągnięcie lub wklejenie.
-- Opcjonalna historia zapisywana tylko na Twoim urządzeniu.
+- Opcjonalna historia zapisywana tylko w Twojej przeglądarce.
 - Animowany nosacz, delfiny i cały ten polski internetowy kicz. Tło można zatrzymać.
 
 **Jev 1.14 podejmuje decyzje, nie pisze swobodnego tekstu.** Wybiera rodzaj odpowiedzi i pasujące teksty z repertuaru Slopika. Pomysły ocenia osobno pod kątem popytu, wykonalności i wyróżnika. Inspiracja: [Kill My Idea](https://github.com/monteduro/killmyidea).
@@ -75,8 +75,13 @@ playwright-cli run-code --filename tests/browser-flow.js
 playwright-cli run-code --filename tests/responsive-browser.js
 playwright-cli run-code --filename tests/polish-browser.js
 playwright-cli close
+playwright-cli open http://localhost:8787
+playwright-cli run-code --filename tests/android-ui-browser.js
+playwright-cli close
 ```
 
 Testy zastępują odpowiedzi usług zewnętrznych wyłącznie w sesji testowej. Nie są dowodem działania prawdziwego konta Jev ani produkcyjnego Turnstile.
+
+Pełny [spis tekstów aplikacji](docs/copy.md) i [pomiary wydajności](docs/performance.md).
 
 Fonty DM Sans i Outfit mają licencje OFL dołączone w `public/fonts/`.

@@ -142,7 +142,7 @@ async function verifyResponsive(page) {
     mimeType: "image/png",
     buffer,
   });
-  const remove = page.getByRole("button", { name: "Usuń załącznik" });
+  const remove = page.getByRole("button", { name: "Usuń obraz" });
   await remove.waitFor();
   await remove.scrollIntoViewIfNeeded();
   await remove.click();

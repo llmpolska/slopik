@@ -25,6 +25,7 @@ export function HistoryDialog({
 }: Props) {
   const reduced = useReducedMotion();
   const restoreFocus = useRef<HTMLElement | null>(null);
+  const closeButton = useRef<HTMLButtonElement>(null);
   return (
     <Dialog.Root
       open={panel !== null}
@@ -47,9 +48,11 @@ export function HistoryDialog({
             <Dialog.Content
               forceMount
               asChild
-              onOpenAutoFocus={() => {
+              onOpenAutoFocus={(event) => {
                 if (document.activeElement instanceof HTMLElement)
                   restoreFocus.current = document.activeElement;
+                event.preventDefault();
+                closeButton.current?.focus();
               }}
               onCloseAutoFocus={(event) => {
                 event.preventDefault();
@@ -62,20 +65,39 @@ export function HistoryDialog({
                   opacity: 0,
                   scale: reduced ? 1 : 0.96,
                   y: reduced ? 0 : 10,
-                  filter: reduced ? "none" : "blur(4px)",
                 }}
-                animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{
                   opacity: 0,
                   scale: reduced ? 1 : 0.98,
                   y: reduced ? 0 : 6,
-                  filter: reduced ? "none" : "blur(2px)",
                 }}
                 transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
               >
                 <div className="dialog-top">
+                  {panel === "history" && (
+                    <div className="save-setting">
+                      <div>
+                        <label htmlFor="remember-chats">
+                          Zapisuj historię rozmów lokalnie
+                        </label>
+                      </div>
+                      <Switch.Root
+                        id="remember-chats"
+                        className="switch-track"
+                        checked={remember}
+                        onCheckedChange={onRemember}
+                        aria-label="Zapisuj historię rozmów lokalnie"
+                      >
+                        <Switch.Thumb className="switch-thumb">
+                          <span />
+                        </Switch.Thumb>
+                      </Switch.Root>
+                    </div>
+                  )}
                   <Dialog.Close asChild>
                     <button
+                      ref={closeButton}
                       className="icon-button dialog-close"
                       aria-label="Zamknij okno"
                     >
@@ -88,29 +110,9 @@ export function HistoryDialog({
                 </Dialog.Title>
                 <Dialog.Description className="sr-only">
                   {panel === "history"
-                    ? "Zapisane rozmowy na tym urządzeniu."
+                    ? "Pytania i werdykty zapisane w tej przeglądarce."
                     : "Nie zapisujemy rozmów na serwerze."}
                 </Dialog.Description>
-                {panel === "history" && (
-                  <div className="save-setting">
-                    <div>
-                      <label htmlFor="remember-chats">
-                        Zapisuj historię rozmów lokalnie
-                      </label>
-                    </div>
-                    <Switch.Root
-                      id="remember-chats"
-                      className="switch-track"
-                      checked={remember}
-                      onCheckedChange={onRemember}
-                      aria-label="Zapisuj historię rozmów lokalnie"
-                    >
-                      <Switch.Thumb className="switch-thumb">
-                        <span />
-                      </Switch.Thumb>
-                    </Switch.Root>
-                  </div>
-                )}
                 {panel === "history" && (
                   <div className="history-body">
                     <AnimatePresence initial={false} mode="wait">

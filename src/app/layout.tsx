@@ -79,6 +79,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: "#16071f",
   interactiveWidget: "resizes-content",
+  viewportFit: "cover",
+  colorScheme: "dark",
 };
 
 const application = {

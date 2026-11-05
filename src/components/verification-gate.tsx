@@ -20,11 +20,13 @@ export function VerificationGate({
   siteKey,
   ready,
   onVerified,
+  onElementChange,
 }: {
   open: boolean;
   siteKey?: string;
   ready: boolean;
   onVerified: () => void;
+  onElementChange: (element: HTMLElement | null) => void;
 }) {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const widget = useRef<string | null>(null);
@@ -122,6 +124,7 @@ export function VerificationGate({
               onPointerDownOutside={(event) => event.preventDefault()}
             >
               <motion.section
+                ref={onElementChange}
                 className="dialog-content verification-dialog"
                 initial={{ opacity: 0, scale: reduced ? 1 : 0.97 }}
                 animate={{ opacity: 1, scale: 1 }}

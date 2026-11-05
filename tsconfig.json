@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "types": [
+      "@cloudflare/workers-types",
+      "node"
+    ],
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "incremental": true,
+    "allowJs": true,
+    "isolatedModules": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "worker/**/*.ts",
+    "tests/**/*.ts",
+    "next.config.ts",
+    "worker-configuration.d.ts",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

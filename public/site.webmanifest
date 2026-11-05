@@ -1,0 +1,14 @@
+{
+  "name": "Slopik.pl",
+  "short_name": "Slopik",
+  "description": "Polska wyrocznia AI z nosaczem. Projekt dla zabawy.",
+  "lang": "pl",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#16071f",
+  "theme_color": "#16071f",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/favicon.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

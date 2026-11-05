@@ -1,0 +1,38 @@
+{
+  "name": "slopik",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --hostname 0.0.0.0 --port 5173",
+    "build": "next build && node scripts/build-headers.mjs",
+    "check": "tsc --noEmit",
+    "test": "vitest run",
+    "preview": "npm run build && wrangler dev --ip 0.0.0.0 --port 8787",
+    "deploy": "npm run build && wrangler deploy",
+    "cf:types": "wrangler types --include-runtime false --strict-vars false",
+    "dev:api": "wrangler dev --ip 0.0.0.0 --port 8787"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.3.1",
+    "@radix-ui/react-switch": "^1.4.1",
+    "lucide-react": "^0.468.0",
+    "motion": "^14.9.1",
+    "next": "^16.4.5",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "sonner": "^2.0.8",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "latest",
+    "@types/node": "26.6.6",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "prettier": "^3.9.10",
+    "typescript": "~5.9.3",
+    "vite": "^7.2.0",
+    "vitest": "^5.1.0",
+    "wrangler": "^4.0.0"
+  }
+}

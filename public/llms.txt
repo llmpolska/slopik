@@ -1,0 +1,20 @@
+# Slopik.pl
+
+> Polska wyrocznia AI z nosaczem. Projekt rozrywkowy, stworzony dla zabawy.
+
+Slopik przyjmuje pytania, pomysły i obrazy. Jev 1.14 od TypeSafe AI wybiera typ werdyktu i pasujące teksty z repertuaru aplikacji. Model podejmuje ustrukturyzowane decyzje, nie generuje swobodnej prozy. Pomysły otrzymują ocenę od 0 do 10, zaletę i wadę.
+
+Odpowiedzi nie są poradą medyczną, prawną, finansową ani profesjonalną analizą biznesową. Obsługa obrazów w Jev jest eksperymentalna.
+
+Slopik nie prowadzi bazy rozmów. Pytania i obrazy są przekazywane do TypeSafe AI w celu wydania werdyktu. Opcjonalna historia jest zapisywana wyłącznie w przeglądarce użytkownika, bez obrazów. Cloudflare zapewnia hosting i weryfikację Turnstile. API wymaga poprawnej weryfikacji człowieczeństwa.
+
+## Publiczne materiały
+
+- [Aplikacja](https://slopik.pl/): strona główna w języku polskim.
+- [Kod i dokumentacja](https://github.com/llmpolska/slopik): technologie, uruchomienie, prywatność i wdrożenie.
+- [Mapa strony](https://slopik.pl/sitemap.xml): kanoniczne adresy stron.
+
+## Dostawca modelu
+
+- [TypeSafe AI](https://typesafe.ai/): dostawca Jev.
+- [Modele Jev](https://docs.typesafe.ai/models): możliwości i ograniczenia modelu.

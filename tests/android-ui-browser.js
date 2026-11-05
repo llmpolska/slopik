@@ -40,8 +40,8 @@ async function verifyAndroidUI(page) {
   expect(movies.length === 0, "Gate downloaded ambient video");
   expect(
     (await page.locator(".wordmark img").getAttribute("src")) ===
-      "/assets/logo-static.webp",
-    "Gate animated the logo",
+      "/assets/logo.webp",
+    "Verification logo is not animated",
   );
   verified = true;
   await page.evaluate(() =>

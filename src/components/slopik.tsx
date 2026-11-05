@@ -8,7 +8,6 @@ import {
 } from "motion/react";
 import {
   ArrowUp,
-  ArrowUpRight,
   Paperclip,
   X,
   History,
@@ -27,6 +26,7 @@ import {
 import { HistoryDialog } from "./history-dialog";
 import { VerdictCard } from "./verdict-card";
 import { VerificationGate } from "./verification-gate";
+import { BrandLogo } from "./brand-logo";
 import { attachmentBounds } from "../image";
 
 type Phase =
@@ -92,13 +92,15 @@ export default function Slopik() {
   const input = useRef<HTMLTextAreaElement>(null);
   const file = useRef<HTMLInputElement>(null);
   const video = useRef<HTMLVideoElement>(null);
-  const app = useRef<HTMLDivElement>(null);
+  const logoDock = useRef<HTMLDivElement>(null);
+  const [verificationElement, setVerificationElement] =
+    useState<HTMLElement | null>(null);
   const isLoading = phase.kind === "loading";
   const reduced = useReducedMotion();
   const requestInFlight = useRef(false);
   useEffect(() => {
     const viewport = window.visualViewport;
-    const element = app.current;
+    const element = document.documentElement;
     if (!viewport || !element) return;
     const fitViewport = () => {
       if (viewport.scale === 1)
@@ -394,7 +396,6 @@ export default function Slopik() {
       transition={{ type: "spring", duration: 0.28, bounce: 0.08 }}
     >
       <div
-        ref={app}
         className={`app ${ambientEligible ? "" : "background-paused"} phase-${phase.kind}`}
       >
         <div className="site-content" inert={!config?.verified}>
@@ -420,19 +421,7 @@ export default function Slopik() {
           </div>
           <div className="vignette" aria-hidden="true" />
           <header>
-            <a className="wordmark" href="/" aria-label="Slopik, strona główna">
-              <img
-                src={
-                  ambientEligible
-                    ? "/assets/logo.webp"
-                    : "/assets/logo-static.webp"
-                }
-                width="350"
-                height="350"
-                alt="Slopik.pl"
-                fetchPriority="high"
-              />
-            </a>
+            <div ref={logoDock} className="wordmark-slot" aria-hidden="true" />
             <div className="header-right">
               <button
                 className="header-button background-toggle"
@@ -648,20 +637,13 @@ export default function Slopik() {
             </section>
           </main>
           <footer>
-            <a
-              className="powered"
-              href="https://typesafe.ai"
-              target="_blank"
-              rel="noreferrer"
+            <button
+              className="privacy-button"
+              onClick={() => setPanel("privacy")}
             >
-              <span className="jev-symbol">✳</span>
-              <span>
-                Jev 1.14 <span className="powered-by">by TypeSafe AI</span>
-              </span>
-              <ArrowUpRight size={11} />
-            </a>
+              Prywatność
+            </button>
             <div className="footer-links">
-              <button onClick={() => setPanel("privacy")}>Prywatność</button>
               <a
                 className="creator-link"
                 href="https://llmpolska.pl"
@@ -701,7 +683,15 @@ export default function Slopik() {
             }}
           />
         </div>
+        <BrandLogo
+          dock={logoDock}
+          gate={verificationElement}
+          verified={!!config?.verified}
+          playing={backgroundPlaying && pageVisible && panel === null}
+          panelOpen={panel !== null}
+        />
         <VerificationGate
+          onElementChange={setVerificationElement}
           open={!config?.verified}
           ready={Boolean(config?.ready)}
           siteKey={config?.siteKey}

@@ -99,6 +99,17 @@ async function verifyResponsive(page) {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto(origin);
   const logo = page.locator(".wordmark img");
+  await page.waitForFunction(() => {
+    const logo = document.querySelector(".wordmark").getBoundingClientRect();
+    const dock = document
+      .querySelector(".wordmark-slot")
+      .getBoundingClientRect();
+    return (
+      Math.abs(logo.x - dock.x) < 0.1 &&
+      Math.abs(logo.y - dock.y) < 0.1 &&
+      Math.abs(logo.width - dock.width) < 0.1
+    );
+  });
   await page.getByRole("button", { name: "Spauzuj tło", exact: true }).click();
   await page.waitForFunction(() =>
     document

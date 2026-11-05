@@ -147,7 +147,9 @@ async function measure(page) {
       await page.getByRole("dialog").waitFor();
       await page.locator(".dialog-close").click();
       await page.getByRole("dialog").waitFor({ state: "hidden" });
-      await page.locator(".footer-links button").click();
+      await page
+        .getByRole("button", { name: "Prywatność", exact: true })
+        .click();
       await page.getByRole("dialog").waitFor();
       await page.locator(".dialog-close").click();
       await page.getByRole("dialog").waitFor({ state: "hidden" });

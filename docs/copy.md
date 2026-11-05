@@ -1,6 +1,6 @@
 # Teksty aplikacji
 
-Pełny spis 111 stałych tekstów Slopika. Obejmuje interfejs, repertuar odpowiedzi, błędy, etykiety dostępności i metadane. Trzy uśpione przykłady są oznaczone osobno. Powtórzony tekst występuje w spisie raz.
+Pełny spis 109 stałych tekstów Slopika. Obejmuje interfejs, repertuar odpowiedzi, błędy, etykiety dostępności i metadane. Trzy uśpione przykłady są oznaczone osobno. Powtórzony tekst występuje w spisie raz.
 
 Nosacz mówi o sobie w pierwszej osobie. Przyciski i błędy mają krótko wyjaśniać działanie. Repertuar zawiera jedno przekleństwo; projekt jest dla zabawy.
 
@@ -17,8 +17,6 @@ Nosacz mówi o sobie w pierwszej osobie. Przyciski i błędy mają krótko wyja�
 | Historia                                                                    | Otwórz historię; dostępny tytuł modala                          |
 | Prywatność                                                                  | Otwórz prywatność; dostępny tytuł modala                        |
 | Dodaj obraz lub wklej ze schowka                                            | Podpowiedź przy dodawaniu obrazu                                |
-| Jev 1.14                                                                    | Dostawca modelu                                                 |
-| by TypeSafe AI                                                              | Dostawca modelu; ukryte na wąskich ekranach                     |
 | 2026                                                                        | Rok w stopce                                                    |
 | llmpolska.                                                                  | Link do llmpolska.pl                                            |
 | Slopik.pl                                                                   | Logo i jego tekst alternatywny                                  |

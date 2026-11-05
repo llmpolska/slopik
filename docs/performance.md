@@ -1,6 +1,6 @@
 # Wydajność Slopika na telefonie
 
-Pomiar z 5 listopada 2026. Porównanie referencji `c0e9943` z produkcyjnym buildem gałęzi `perf/android-polish`.
+Pomiar z 5 listopada 2026. Porównanie referencji `c0e9943` z produkcyjnym buildem gałęzi `perf/android-polish` z PR #1. Późniejsze maskotki reakcyjne i zmiany ekranu wyniku nie są objęte tą serią pomiarów.
 
 W tym teście mediana LCP, czyli czasu pojawienia się największego elementu treści, spadła z 5920 ms do 1656 ms, o 72,0%. Formularz był gotowy wcześniej, a główny wątek renderera wykonywał mniej pracy podczas animacji tła. To wynik emulacji na komputerze, nie pomiar fizycznego Androida.
 

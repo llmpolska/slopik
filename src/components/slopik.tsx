@@ -90,6 +90,14 @@ export default function Slopik() {
   const ambientEligible =
     backgroundPlaying && !!config?.verified && panel === null && pageVisible;
   const input = useRef<HTMLTextAreaElement>(null);
+  const focusOnReset = useRef(false);
+  const mountInput = useCallback((element: HTMLTextAreaElement | null) => {
+    input.current = element;
+    if (element && focusOnReset.current) {
+      element.focus({ preventScroll: true });
+      focusOnReset.current = false;
+    }
+  }, []);
   const file = useRef<HTMLInputElement>(null);
   const video = useRef<HTMLVideoElement>(null);
   const logoDock = useRef<HTMLDivElement>(null);
@@ -381,10 +389,10 @@ export default function Slopik() {
     }
   }
   function reset() {
+    focusOnReset.current = true;
     setQuestion("");
     setAttachment(null);
     setPhase({ kind: "idle" });
-    input.current?.focus();
   }
   function selectSample(value: string) {
     setQuestion(value);
@@ -456,138 +464,160 @@ export default function Slopik() {
                   <path d="M4 12Q110 -3 223 8M20 17Q120 4 204 13" />
                 </svg>
               </h1>
-              <motion.form
-                layout
-                className={`composer ${question || attachment ? "has-text" : ""} ${isLoading ? "is-submitting" : ""}`}
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  void submit();
-                }}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  void attach(e.dataTransfer.files[0]);
-                }}
-              >
-                <AnimatePresence initial={false}>
-                  {attachment && (
-                    <motion.div
-                      key="attachment"
-                      className="attachment-wrap"
-                      initial={{ opacity: 0, scale: 0.97 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.97 }}
-                      layout
-                    >
-                      <div className="attachment">
-                        <img src={attachment.preview} alt="Podgląd obrazu" />
-                        <span>{attachment.name}</span>
-                        <button
-                          type="button"
-                          className="icon-button"
-                          aria-label="Usuń obraz"
-                          onClick={() => setAttachment(null)}
-                          disabled={isLoading}
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                <label className="sr-only" htmlFor="question">
-                  Twoje pytanie do nosacza
-                </label>
-                <textarea
-                  id="question"
-                  ref={input}
-                  value={question}
-                  onChange={(e) => setQuestion(e.target.value)}
-                  placeholder="No dawaj, co cię gryzie?"
-                  maxLength={1500}
-                  rows={1}
-                  disabled={isLoading || !hydrated || !config?.verified}
-                  onPaste={(e) => {
-                    const image = Array.from(e.clipboardData.files).find((f) =>
-                      f.type.startsWith("image/"),
-                    );
-                    if (image) {
-                      e.preventDefault();
-                      void attach(image);
-                    }
-                  }}
-                  onKeyDown={(e) => {
-                    if (
-                      e.key === "Enter" &&
-                      !e.shiftKey &&
-                      !e.nativeEvent.isComposing
-                    ) {
+              <AnimatePresence initial={false}>
+                {phase.kind !== "result" && (
+                  <motion.form
+                    key="composer"
+                    initial={{ opacity: 0, y: reduced ? 0 : 8 }}
+                    animate={{ opacity: 1, y: 0, height: "auto" }}
+                    exit={{
+                      opacity: 0,
+                      y: reduced ? 0 : -8,
+                      height: 0,
+                      marginTop: 0,
+                    }}
+                    transition={{
+                      duration: reduced ? 0 : 0.2,
+                      ease: [0.23, 1, 0.32, 1],
+                    }}
+                    layout
+                    className={`composer ${question || attachment ? "has-text" : ""} ${isLoading ? "is-submitting" : ""}`}
+                    onSubmit={(e) => {
                       e.preventDefault();
                       void submit();
-                    }
-                  }}
-                />
-                <div className="composer-bottom">
-                  <div className="input-tools">
-                    <button
-                      type="button"
-                      className="icon-button attach-button"
-                      aria-label="Dodaj obraz"
-                      title="Dodaj obraz lub wklej ze schowka"
-                      onClick={() => file.current?.click()}
-                      disabled={isLoading || attachmentBusy}
-                    >
-                      {attachmentBusy ? (
-                        <LoaderCircle className="spin" size={19} />
-                      ) : (
-                        <Paperclip size={19} />
-                      )}
-                    </button>
-                    {question.length > 0 && (
-                      <span
-                        className={question.length > 1400 ? "near-limit" : ""}
-                      >
-                        {question.length}/1500
-                      </span>
-                    )}
-                  </div>
-                  <motion.button
-                    layout
-                    className="ask-button"
-                    type="submit"
-                    disabled={
-                      (!question.trim() && !attachment) ||
-                      isLoading ||
-                      attachmentBusy
-                    }
-                    whileTap={{ scale: 0.97 }}
+                    }}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      void attach(e.dataTransfer.files[0]);
+                    }}
                   >
-                    <AnimatePresence initial={false} mode="popLayout">
-                      <motion.span
-                        key={isLoading ? "loading" : "ready"}
-                        className="ask-label"
-                        initial={{
-                          opacity: 0,
-                          y: reduced ? 0 : 6,
-                        }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{
-                          opacity: 0,
-                          y: reduced ? 0 : -6,
-                        }}
-                        transition={{ duration: 0.16 }}
-                      >
-                        {isLoading ? "Rozkminiam…" : "Zapytaj nosacza"}
-                        {isLoading ? (
-                          <LoaderCircle size={18} className="spin" />
-                        ) : (
-                          <ArrowUp size={19} />
-                        )}
-                      </motion.span>
+                    <AnimatePresence initial={false}>
+                      {attachment && (
+                        <motion.div
+                          key="attachment"
+                          className="attachment-wrap"
+                          initial={{ opacity: 0, scale: 0.97 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.97 }}
+                          layout
+                        >
+                          <div className="attachment">
+                            <img
+                              src={attachment.preview}
+                              alt="Podgląd obrazu"
+                            />
+                            <span>{attachment.name}</span>
+                            <button
+                              type="button"
+                              className="icon-button"
+                              aria-label="Usuń obraz"
+                              onClick={() => setAttachment(null)}
+                              disabled={isLoading}
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        </motion.div>
+                      )}
                     </AnimatePresence>
-                  </motion.button>
-                </div>
-              </motion.form>
+                    <label className="sr-only" htmlFor="question">
+                      Twoje pytanie do nosacza
+                    </label>
+                    <textarea
+                      id="question"
+                      ref={mountInput}
+                      value={question}
+                      onChange={(e) => setQuestion(e.target.value)}
+                      placeholder="No dawaj, co cię gryzie?"
+                      maxLength={1500}
+                      rows={1}
+                      disabled={isLoading || !hydrated || !config?.verified}
+                      onPaste={(e) => {
+                        const image = Array.from(e.clipboardData.files).find(
+                          (f) => f.type.startsWith("image/"),
+                        );
+                        if (image) {
+                          e.preventDefault();
+                          void attach(image);
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (
+                          e.key === "Enter" &&
+                          !e.shiftKey &&
+                          !e.nativeEvent.isComposing
+                        ) {
+                          e.preventDefault();
+                          void submit();
+                        }
+                      }}
+                    />
+                    <div className="composer-bottom">
+                      <div className="input-tools">
+                        <button
+                          type="button"
+                          className="icon-button attach-button"
+                          aria-label="Dodaj obraz"
+                          title="Dodaj obraz lub wklej ze schowka"
+                          onClick={() => file.current?.click()}
+                          disabled={isLoading || attachmentBusy}
+                        >
+                          {attachmentBusy ? (
+                            <LoaderCircle className="spin" size={19} />
+                          ) : (
+                            <Paperclip size={19} />
+                          )}
+                        </button>
+                        {question.length > 0 && (
+                          <span
+                            className={
+                              question.length > 1400 ? "near-limit" : ""
+                            }
+                          >
+                            {question.length}/1500
+                          </span>
+                        )}
+                      </div>
+                      <motion.button
+                        layout
+                        className="ask-button"
+                        type="submit"
+                        disabled={
+                          (!question.trim() && !attachment) ||
+                          isLoading ||
+                          attachmentBusy
+                        }
+                        whileTap={{ scale: 0.97 }}
+                      >
+                        <AnimatePresence initial={false} mode="popLayout">
+                          <motion.span
+                            key={isLoading ? "loading" : "ready"}
+                            className="ask-label"
+                            initial={{
+                              opacity: 0,
+                              y: reduced ? 0 : 6,
+                            }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{
+                              opacity: 0,
+                              y: reduced ? 0 : -6,
+                            }}
+                            transition={{ duration: 0.16 }}
+                          >
+                            {isLoading ? "Rozkminiam…" : "Zapytaj nosacza"}
+                            {isLoading ? (
+                              <LoaderCircle size={18} className="spin" />
+                            ) : (
+                              <ArrowUp size={19} />
+                            )}
+                          </motion.span>
+                        </AnimatePresence>
+                      </motion.button>
+                    </div>
+                  </motion.form>
+                )}
+              </AnimatePresence>
               <input
                 className="sr-only"
                 type="file"

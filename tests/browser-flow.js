@@ -114,6 +114,7 @@ async function verify(page) {
       },
     }),
   );
+  await page.getByRole("button", { name: "Kolejna rozkmina" }).click();
   await page.getByRole("textbox").fill("Czy gołąb wie, że jest bezrobotny?");
   await page
     .getByRole("button", { name: "Zapytaj nosacza", exact: true })
@@ -141,6 +142,11 @@ async function verify(page) {
   await page
     .getByRole("heading", { name: "Rada delfinów zatwierdziła odklejkę." })
     .waitFor();
+  await page.locator(".composer").waitFor({ state: "hidden" });
+  assert(
+    (await page.getByRole("textbox").count()) === 0,
+    "History restoration must hide composer",
+  );
   await page.getByRole("button", { name: /Historia/ }).click();
   await page.getByRole("button", { name: "Usuń całą historię" }).click();
   await page.getByRole("switch").uncheck();

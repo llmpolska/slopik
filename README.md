@@ -10,6 +10,7 @@ Absurdalna polska wyrocznia AI. Zadajesz pytanie, wrzucasz pomysł albo obrazek,
 
 - Krótkie werdykty dla pytań i memiczne odpowiedzi na absurd.
 - Ocena pomysłu od 0 do 10, największa zaleta i wada.
+- Po odpowiedzi pole pytania znika, a nosacz trzyma kartę z werdyktem. Kolejna rozkmina przywraca formularz.
 - Dodawanie obrazów przez plik, przeciągnięcie lub wklejenie.
 - Opcjonalna historia zapisywana tylko w Twojej przeglądarce.
 - Animowany nosacz, delfiny i cały ten polski internetowy kicz. Tło można zatrzymać.

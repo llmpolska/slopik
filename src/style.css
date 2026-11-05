@@ -239,28 +239,69 @@ main {
   text-align: center;
   z-index: 1;
 }
+.phase-result .cosmos {
+  -webkit-mask-image: linear-gradient(#000 16%, transparent 42%);
+  mask-image: linear-gradient(#000 16%, transparent 42%);
+}
 .phase-result main {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .phase-result .oracle {
   margin-inline: auto;
-  max-height: 100%;
+  height: 100%;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(1rem, 3dvh, 2rem);
 }
-.phase-result h1,
-.phase-result .composer {
+.phase-result h1 {
   flex-shrink: 0;
 }
-.phase-result .result {
+.phase-result .composer {
+  flex-shrink: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.verdict-scene {
+  --peek-height: clamp(6rem, 22dvh, 13rem);
+  width: 100%;
+  max-width: calc((var(--peek-height) + 1.5rem) * 2);
+  align-self: center;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
   flex: 0 1 auto;
-  min-height: 8rem;
+  min-height: 0;
+  padding-top: var(--peek-height);
+}
+.verdict-mascot {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: calc(var(--peek-height) + 1.5rem);
+  object-fit: contain;
+  object-position: bottom;
+  pointer-events: none;
+  user-select: none;
+}
+.phase-result .result {
+  position: relative;
+  flex: 0 1 auto;
+  min-height: 5rem;
+  margin-top: 0;
+  padding-top: clamp(1.25rem, 3dvh, 1.75rem);
 }
 .phase-result .mascot-space {
   display: none;
 }
 .phase-result h1 {
-  font-size: clamp(1.75rem, 5dvh, 3rem);
+  font-size: clamp(1.75rem, 6dvh, 3.75rem);
 }
 h1 {
   font-family: "Outfit", sans-serif;
@@ -551,7 +592,7 @@ footer {
   scrollbar-width: thin;
   overflow-wrap: anywhere;
   text-align: left;
-  border: 1px solid #d796e940;
+  border: 1px solid #d796e975;
   border-radius: 20px;
   padding: clamp(1rem, 3vw, 1.5rem);
   background: linear-gradient(140deg, #3b1b4390, #25102ef0);

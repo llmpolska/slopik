@@ -82,6 +82,31 @@ async function verifyResponsive(page) {
       .getByRole("button", { name: "Zapytaj nosacza", exact: true })
       .click();
     await page.locator(".result").waitFor();
+    await page.locator(".composer").waitFor({ state: "hidden" });
+    expect(
+      (await page.getByRole("textbox").count()) === 0,
+      "Result must hide composer",
+    );
+    const mascot = page.locator(".verdict-mascot");
+    await mascot.evaluate((img) => img.decode());
+    expect(
+      (await mascot.getAttribute("aria-hidden")) === "true",
+      "Mascot must be decorative",
+    );
+    expect(
+      await mascot.evaluate(
+        (img) => getComputedStyle(img).pointerEvents === "none",
+      ),
+      "Mascot must not intercept actions",
+    );
+    expect(
+      await page.evaluate(
+        () =>
+          document.documentElement.scrollHeight <= innerHeight &&
+          document.documentElement.scrollWidth <= innerWidth,
+      ),
+      `Result overflow at ${width}x${height}`,
+    );
     const result = await page.locator(".result").evaluate((el) => ({
       scrolls: el.scrollHeight > el.clientHeight,
       height: el.clientHeight,
@@ -94,11 +119,17 @@ async function verifyResponsive(page) {
     await reset.scrollIntoViewIfNeeded();
     await reset.click();
     await page.locator(".chips").waitFor();
+    await page.waitForFunction(() => document.activeElement?.id === "question");
+    expect(
+      (await page.getByRole("textbox").inputValue()) === "",
+      "Reset must clear the draft",
+    );
     results.push({ width, height, ...idle, verdictScrolls: result.scrolls });
   }
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto(origin);
   const logo = page.locator(".wordmark img");
+  await logo.waitFor();
   await page.waitForFunction(() => {
     const logo = document.querySelector(".wordmark").getBoundingClientRect();
     const dock = document
@@ -174,5 +205,19 @@ async function verifyResponsive(page) {
   );
   results.push({ enlargedText: enlarged });
   await page.evaluate(() => (document.documentElement.style.fontSize = ""));
+  await page
+    .getByRole("button", { name: "Zapytaj nosacza", exact: true })
+    .click();
+  await page.locator(".result").waitFor();
+  await page.locator(".composer").waitFor({ state: "hidden" });
+  const reducedReset = page.getByRole("button", { name: "Kolejna rozkmina" });
+  await reducedReset.scrollIntoViewIfNeeded();
+  await reducedReset.click();
+  await page.waitForFunction(() => document.activeElement?.id === "question");
+  expect(
+    (await page.getByRole("textbox").inputValue()) === "",
+    "Reduced-motion reset must clear and focus composer",
+  );
+  results.push({ reducedMotionReset: true });
   return results;
 }

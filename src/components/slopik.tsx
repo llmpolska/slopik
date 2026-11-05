@@ -599,7 +599,16 @@ export default function Slopik() {
             </a>
             <div className="footer-links">
               <button onClick={() => setPanel("privacy")}>Prywatność</button>
-              <a href="https://llmpolska.pl">2026 llmpolska</a>
+              <a
+                className="creator-link"
+                href="https://llmpolska.pl"
+                aria-label="2026 llmpolska"
+              >
+                <span className="creator-year">2026</span>
+                <span className="creator-wordmark">
+                  llmpolska<span aria-hidden="true">.</span>
+                </span>
+              </a>
             </div>
           </footer>
           <HistoryDialog

@@ -500,6 +500,26 @@ footer {
   gap: 6px;
   min-height: 44px;
 }
+.creator-year {
+  font-size: 0.75rem;
+  color: #b49bbd;
+  font-variant-numeric: tabular-nums;
+}
+.creator-wordmark {
+  font-family: "Outfit", sans-serif;
+  font-size: 1rem;
+  font-weight: 750;
+  letter-spacing: -0.035em;
+  color: #f3def5;
+}
+.creator-wordmark > span {
+  color: var(--pink);
+}
+.creator-link:hover .creator-wordmark {
+  text-decoration: underline;
+  text-decoration-color: var(--pink);
+  text-underline-offset: 0.25em;
+}
 .result {
   margin-top: clamp(0.75rem, 2dvh, 1.5rem);
   min-height: 0;

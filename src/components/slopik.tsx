@@ -29,6 +29,7 @@ import {
 import { HistoryDialog } from "./history-dialog";
 import { VerdictCard } from "./verdict-card";
 import { VerificationGate } from "./verification-gate";
+import { attachmentBounds } from "../image";
 
 type Phase =
   | { kind: "idle" }
@@ -162,15 +163,21 @@ export default function Slopik() {
         bitmap.close();
         throw new Error();
       }
-      const scale = Math.min(1, 1280 / Math.max(bitmap.width, bitmap.height));
+      const bounds = attachmentBounds(bitmap.width, bitmap.height);
       const canvas = document.createElement("canvas");
-      canvas.width = Math.round(bitmap.width * scale);
-      canvas.height = Math.round(bitmap.height * scale);
+      canvas.width = bounds.canvasWidth;
+      canvas.height = bounds.canvasHeight;
       const ctx = canvas.getContext("2d");
       if (!ctx) throw new Error();
       ctx.fillStyle = "#fff";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(
+        bitmap,
+        bounds.x,
+        bounds.y,
+        bounds.imageWidth,
+        bounds.imageHeight,
+      );
       bitmap.close();
       const preview = canvas.toDataURL("image/jpeg", 0.8);
       const data = preview.split(",")[1];

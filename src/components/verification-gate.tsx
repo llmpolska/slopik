@@ -67,6 +67,7 @@ export function VerificationGate({
       widget.current = window.turnstile.render(container.current, {
         sitekey: siteKey,
         action: "access",
+        language: "pl",
         theme: "dark",
         callback: verify,
         "error-callback": () => {

@@ -76,7 +76,10 @@ export const metadata: Metadata = {
   manifest: "/site.webmanifest",
 };
 
-export const viewport: Viewport = { themeColor: "#16071f" };
+export const viewport: Viewport = {
+  themeColor: "#16071f",
+  interactiveWidget: "resizes-content",
+};
 
 const application = {
   "@context": "https://schema.org",

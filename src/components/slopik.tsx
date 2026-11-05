@@ -12,8 +12,6 @@ import {
   Paperclip,
   X,
   History,
-  Volume2,
-  VolumeX,
   LoaderCircle,
   Pause,
   Play,
@@ -78,15 +76,30 @@ export default function Slopik() {
   const [config, setConfig] = useState<z.infer<typeof ConfigSchema> | null>(
     null,
   );
-  const [quiet, setQuiet] = useState(true);
   const [backgroundPlaying, setBackgroundPlaying] = useState(true);
   const [videoOk, setVideoOk] = useState(true);
   const input = useRef<HTMLTextAreaElement>(null);
   const file = useRef<HTMLInputElement>(null);
   const video = useRef<HTMLVideoElement>(null);
+  const app = useRef<HTMLDivElement>(null);
   const isLoading = phase.kind === "loading";
   const reduced = useReducedMotion();
   const requestInFlight = useRef(false);
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    const element = app.current;
+    if (!viewport || !element) return;
+    const fitViewport = () => {
+      if (viewport.scale === 1)
+        element.style.setProperty("--viewport-height", `${viewport.height}px`);
+    };
+    fitViewport();
+    viewport.addEventListener("resize", fitViewport);
+    return () => {
+      viewport.removeEventListener("resize", fitViewport);
+      element.style.removeProperty("--viewport-height");
+    };
+  }, []);
   useEffect(() => {
     const sync = () => {
       try {
@@ -129,7 +142,7 @@ export default function Slopik() {
   useEffect(() => {
     if (!input.current) return;
     input.current.style.height = "auto";
-    input.current.style.height = `${Math.min(input.current.scrollHeight, 150)}px`;
+    input.current.style.height = `${input.current.scrollHeight}px`;
   }, [question]);
   function toggleRemember(value: boolean) {
     try {
@@ -190,28 +203,6 @@ export default function Slopik() {
       if (file.current) file.current.value = "";
     }
   }
-  function chime() {
-    if (quiet) return;
-    try {
-      const audio = new AudioContext();
-      const oscillator = audio.createOscillator();
-      const gain = audio.createGain();
-      oscillator.connect(gain);
-      gain.connect(audio.destination);
-      oscillator.frequency.setValueAtTime(660, audio.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(
-        990,
-        audio.currentTime + 0.2,
-      );
-      gain.gain.setValueAtTime(0.035, audio.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + 0.5);
-      oscillator.start();
-      oscillator.stop(audio.currentTime + 0.5);
-      oscillator.onended = () => void audio.close();
-    } catch {
-      /* Audio is optional in browsers that block playback. */
-    }
-  }
   async function submit() {
     if (
       (!question.trim() && !attachment) ||
@@ -264,7 +255,6 @@ export default function Slopik() {
       }
       const { verdict } = ResultSchema.parse(body);
       setPhase({ kind: "result", verdict, question: asked });
-      chime();
       try {
         if (localStorage.getItem("slopik.remember") === "yes") {
           const next = [
@@ -334,6 +324,7 @@ export default function Slopik() {
       transition={{ type: "spring", duration: 0.28, bounce: 0.08 }}
     >
       <div
+        ref={app}
         className={`app ${backgroundPlaying ? "" : "background-paused"} phase-${phase.kind}`}
       >
         <div className="site-content" inert={!config?.verified}>
@@ -355,8 +346,23 @@ export default function Slopik() {
           <div className="vignette" aria-hidden="true" />
           <header>
             <a className="wordmark" href="/" aria-label="Slopik, strona główna">
-              slopik<span>.pl</span>
-              <span className="wordmark-star">✦</span>
+              <picture>
+                <source
+                  media="(prefers-reduced-motion: reduce)"
+                  srcSet="/assets/logo-static.webp"
+                />
+                <img
+                  src={
+                    backgroundPlaying
+                      ? "/assets/logo.webp"
+                      : "/assets/logo-static.webp"
+                  }
+                  width="320"
+                  height="176"
+                  alt="Slopik.pl"
+                  fetchPriority="high"
+                />
+              </picture>
             </a>
             <div className="header-right">
               <button
@@ -379,14 +385,6 @@ export default function Slopik() {
                 {history.length > 0 && (
                   <span className="history-count">{history.length}</span>
                 )}
-              </button>
-              <button
-                className="icon-button"
-                aria-label={quiet ? "Włącz dźwięk" : "Wyłącz dźwięk"}
-                aria-pressed={!quiet}
-                onClick={() => setQuiet(!quiet)}
-              >
-                {quiet ? <VolumeX size={18} /> : <Volume2 size={18} />}
               </button>
             </div>
           </header>
@@ -491,13 +489,13 @@ export default function Slopik() {
                         <Paperclip size={19} />
                       )}
                     </button>
-                    <span
-                      className={question.length > 1400 ? "near-limit" : ""}
-                    >
-                      {question.length
-                        ? `${question.length}/1500`
-                        : "Wklej też obrazek"}
-                    </span>
+                    {question.length > 0 && (
+                      <span
+                        className={question.length > 1400 ? "near-limit" : ""}
+                      >
+                        {question.length}/1500
+                      </span>
+                    )}
                   </div>
                   <motion.button
                     layout
@@ -571,8 +569,10 @@ export default function Slopik() {
                           key={sample}
                           onClick={() => selectSample(sample)}
                         >
-                          <span>{["🥙", "💡", "🐦"][index]}</span>
-                          {sample}
+                          <span aria-hidden="true">
+                            {["🥙", "💡", "🐦"][index]}
+                          </span>
+                          <span className="sample-text">{sample}</span>
                         </button>
                       ))}
                     </div>
@@ -599,7 +599,7 @@ export default function Slopik() {
             </a>
             <div className="footer-links">
               <button onClick={() => setPanel("privacy")}>Prywatność</button>
-              <span>© 2026 Slopik</span>
+              <a href="https://llmpolska.pl">2026 llmpolska</a>
             </div>
           </footer>
           <HistoryDialog

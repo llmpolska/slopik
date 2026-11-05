@@ -57,7 +57,7 @@ export function HistoryDialog({
               }}
             >
               <motion.section
-                className="dialog-content"
+                className={`dialog-content ${panel === "privacy" ? "privacy-dialog" : ""}`}
                 initial={{
                   opacity: 0,
                   scale: reduced ? 1 : 0.96,
@@ -89,7 +89,7 @@ export function HistoryDialog({
                 <Dialog.Description className="sr-only">
                   {panel === "history"
                     ? "Zapisane rozmowy na tym urządzeniu."
-                    : "Nie przechowujemy Twoich rozmów na serwerze."}
+                    : "Nie zapisujemy rozmów na serwerze."}
                 </Dialog.Description>
                 {panel === "history" && (
                   <div className="save-setting">
@@ -153,7 +153,7 @@ export function HistoryDialog({
                     <p>Nie zapisujemy rozmów na serwerze.</p>
                     <p>
                       Pytania i obrazy trafiają do TypeSafe AI. Cloudflare
-                      zabezpiecza formularz. Nie wysyłaj danych wrażliwych.
+                      zabezpiecza formularz.
                     </p>
                     <div className="privacy-links">
                       <a
@@ -161,6 +161,12 @@ export function HistoryDialog({
                         target="_blank"
                         rel="noreferrer"
                       >
+                        <img
+                          src="/brand/typesafe.png"
+                          alt=""
+                          width="24"
+                          height="24"
+                        />
                         TypeSafe AI
                         <ArrowUpRight size={12} />
                       </a>
@@ -169,6 +175,12 @@ export function HistoryDialog({
                         target="_blank"
                         rel="noreferrer"
                       >
+                        <img
+                          src="/brand/cloudflare.png"
+                          alt=""
+                          width="24"
+                          height="24"
+                        />
                         Cloudflare
                         <ArrowUpRight size={12} />
                       </a>

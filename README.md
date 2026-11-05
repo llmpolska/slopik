@@ -72,6 +72,7 @@ Przy uruchomionym podglądzie można sprawdzić interfejs przez `playwright-cli`
 ```sh
 playwright-cli open http://localhost:8787
 playwright-cli run-code --filename tests/browser-flow.js
+playwright-cli run-code --filename tests/responsive-browser.js
 playwright-cli run-code --filename tests/polish-browser.js
 playwright-cli close
 ```

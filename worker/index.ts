@@ -130,7 +130,7 @@ export default {
         return response;
       }
       if (!(await hasSession(request, env.SESSION_SECRET)))
-        return fail("Potwierdź, że jesteś człowiekiem.", 401);
+        return fail("Potwierdź jeszcze raz, że jesteś człowiekiem.", 401);
       let raw: unknown;
       try {
         raw = await limitedBody(request);
@@ -140,7 +140,7 @@ export default {
       const parsed = RequestSchema.safeParse(raw);
       if (!parsed.success)
         return fail(
-          "Sprawdź pytanie i załącznik. Maksymalnie 1500 znaków i jeden obraz.",
+          "Sprawdź pytanie i obraz. Maksymalnie 1500 znaków i jeden obraz.",
           400,
         );
       if (!(await env.GLOBAL_LIMIT.limit({ key: "all" })).success)
@@ -159,7 +159,7 @@ export default {
       });
       if (!upstream.ok)
         return fail(
-          "Jev ma chwilową przerwę. Spróbuj ponownie za moment.",
+          "Jev nie zwrócił werdyktu. Spróbuj ponownie za moment.",
           502,
         );
       return json({
@@ -167,7 +167,7 @@ export default {
         model: "jev-1.14.0",
       });
     } catch {
-      return fail("Kosmiczne zakłócenia. Nosacz prosi o kolejną próbę.", 502);
+      return fail("Nosacz się zaciął. Spróbuj ponownie.", 502);
     }
   },
 };

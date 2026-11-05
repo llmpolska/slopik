@@ -76,8 +76,19 @@ export default function Slopik() {
   const [config, setConfig] = useState<z.infer<typeof ConfigSchema> | null>(
     null,
   );
-  const [backgroundPlaying, setBackgroundPlaying] = useState(true);
-  const [videoOk, setVideoOk] = useState(true);
+  const [backgroundPreference, setBackgroundPreference] = useState<
+    "auto" | "playing" | "paused"
+  >("auto");
+  const [systemPaused, setSystemPaused] = useState(true);
+  const [pageVisible, setPageVisible] = useState(false);
+  const [videoSource, setVideoSource] = useState<string | null>(null);
+  const [videoVisible, setVideoVisible] = useState(false);
+  const backgroundPlaying =
+    hydrated &&
+    (backgroundPreference === "playing" ||
+      (backgroundPreference === "auto" && !systemPaused));
+  const ambientEligible =
+    backgroundPlaying && !!config?.verified && panel === null && pageVisible;
   const input = useRef<HTMLTextAreaElement>(null);
   const file = useRef<HTMLInputElement>(null);
   const video = useRef<HTMLVideoElement>(null);
@@ -112,33 +123,88 @@ export default function Slopik() {
     };
     sync();
     setHydrated(true);
-    const prefersReducedMotion = matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    try {
-      setBackgroundPlaying(
-        localStorage.getItem("slopik.background") !== "paused" &&
-          !prefersReducedMotion,
+    const motionPreference = matchMedia("(prefers-reduced-motion: reduce)");
+    const connection = "connection" in navigator ? navigator.connection : null;
+    const syncPreferences = () =>
+      setSystemPaused(
+        motionPreference.matches ||
+          !!(
+            connection &&
+            typeof connection === "object" &&
+            "saveData" in connection &&
+            connection.saveData
+          ),
       );
+    const updateVisibility = () => setPageVisible(!document.hidden);
+    motionPreference.addEventListener("change", syncPreferences);
+    if (connection instanceof EventTarget)
+      connection.addEventListener("change", syncPreferences);
+    document.addEventListener("visibilitychange", updateVisibility);
+    syncPreferences();
+    updateVisibility();
+    try {
+      if (localStorage.getItem("slopik.background") === "paused")
+        setBackgroundPreference("paused");
     } catch {
-      setBackgroundPlaying(!prefersReducedMotion);
+      // System motion preferences still apply when storage is unavailable.
     }
     window.addEventListener("storage", sync);
-    return () => window.removeEventListener("storage", sync);
+    return () => {
+      window.removeEventListener("storage", sync);
+      motionPreference.removeEventListener("change", syncPreferences);
+      if (connection instanceof EventTarget)
+        connection.removeEventListener("change", syncPreferences);
+      document.removeEventListener("visibilitychange", updateVisibility);
+    };
   }, []);
   useEffect(() => {
     fetch("/api/config")
       .then((r) => r.json())
       .then((v) => setConfig(ConfigSchema.parse(v)))
       .catch(() =>
-        toast.error("Nie udało się połączyć z wyrocznią. Odśwież stronę."),
+        toast.error("Nie udało się połączyć z wyrocznią. Spróbuj ponownie."),
       );
   }, []);
   useEffect(() => {
-    if (!video.current) return;
-    if (backgroundPlaying) void video.current.play().catch(() => {});
-    else video.current.pause();
-  }, [backgroundPlaying, videoOk]);
+    if (!ambientEligible || videoSource) return;
+    let cancelled = false;
+    let idle: number | undefined;
+    // Leave the first usable form paint and critical image/font requests ahead of video.
+    const delay = window.setTimeout(() => {
+      const load = () => {
+        if (!cancelled)
+          setVideoSource(
+            matchMedia("(max-width: 45rem)").matches
+              ? "/assets/oracle-mobile.mp4"
+              : "/assets/oracle.mp4",
+          );
+      };
+      if ("requestIdleCallback" in window)
+        idle = window.requestIdleCallback(load, { timeout: 1500 });
+      else load();
+    }, 800);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(delay);
+      if (idle !== undefined) window.cancelIdleCallback(idle);
+    };
+  }, [ambientEligible, videoSource]);
+  useEffect(() => {
+    const element = video.current;
+    if (!element || !videoSource) return;
+    if (!ambientEligible) {
+      element.pause();
+      return;
+    }
+    let cancelled = false;
+    void element.play().catch(() => {
+      if (!cancelled) setVideoVisible(false);
+    });
+    return () => {
+      cancelled = true;
+      element.pause();
+    };
+  }, [ambientEligible, videoSource]);
   useEffect(() => {
     if (!input.current) return;
     input.current.style.height = "auto";
@@ -197,7 +263,9 @@ export default function Slopik() {
       if (!data || data.length > 1_400_000) throw new Error();
       setAttachment({ name: selected.name, preview, data, format: "jpg" });
     } catch {
-      toast.error("Nie udało się odczytać obrazu. Spróbuj mniejszego pliku.");
+      toast.error(
+        "Nie udało się odczytać obrazu. Spróbuj innego lub mniejszego pliku.",
+      );
     } finally {
       setAttachmentBusy(false);
       if (file.current) file.current.value = "";
@@ -247,7 +315,9 @@ export default function Slopik() {
         }
         const error = z.object({ error: z.string() }).safeParse(body);
         toast.error(
-          error.success ? error.data.error : "Nie udało się odczytać werdyktu.",
+          error.success
+            ? error.data.error
+            : "Nie udało się pobrać werdyktu. Spróbuj ponownie.",
           { id: "oracle-error" },
         );
         setPhase({ kind: "idle" });
@@ -266,7 +336,7 @@ export default function Slopik() {
         }
       } catch {
         toast.error(
-          "Brak miejsca na historię. Werdykt jest dostępny w tej karcie.",
+          "Brak miejsca w przeglądarce. Ten werdykt nie trafił do historii.",
         );
       }
     } catch {
@@ -281,7 +351,7 @@ export default function Slopik() {
   }
   async function share() {
     if (phase.kind !== "result") return;
-    const text = `„${phase.question}”\n\n${phase.verdict.verdict}${phase.verdict.kind === "idea" ? `\nOcena nosacza: ${phase.verdict.score}/10` : ""}\n\nslopik.pl`;
+    const text = `„${phase.question}”\n\n${phase.verdict.verdict}${phase.verdict.kind === "idea" ? `\nOcena nosacza: ${phase.verdict.score.toLocaleString("pl-PL")}/10` : ""}\n\nslopik.pl`;
     try {
       if (navigator.share)
         await navigator.share({ title: "Nosacz wydał wyrok", text });
@@ -301,7 +371,7 @@ export default function Slopik() {
   }, []);
   function toggleBackground() {
     const next = !backgroundPlaying;
-    setBackgroundPlaying(next);
+    setBackgroundPreference(next ? "playing" : "paused");
     try {
       localStorage.setItem("slopik.background", next ? "playing" : "paused");
     } catch {
@@ -325,44 +395,43 @@ export default function Slopik() {
     >
       <div
         ref={app}
-        className={`app ${backgroundPlaying ? "" : "background-paused"} phase-${phase.kind}`}
+        className={`app ${ambientEligible ? "" : "background-paused"} phase-${phase.kind}`}
       >
         <div className="site-content" inert={!config?.verified}>
           <div className="cosmos" aria-hidden="true">
-            <img src="/assets/oracle.jpg" alt="" fetchPriority="high" />
-            {videoOk && (
-              <video
-                ref={video}
-                src="/assets/oracle.mp4"
-                autoPlay
-                muted
-                loop
-                playsInline
-                poster="/assets/oracle.jpg"
-                onError={() => setVideoOk(false)}
+            <picture>
+              <source
+                media="(max-width: 45rem)"
+                srcSet="/assets/oracle-mobile.webp"
               />
-            )}
+              <img src="/assets/oracle.webp" alt="" fetchPriority="high" />
+            </picture>
+            <video
+              ref={video}
+              src={videoSource ?? undefined}
+              preload="none"
+              muted
+              loop
+              playsInline
+              style={{ opacity: videoVisible ? 1 : 0 }}
+              onPlaying={() => setVideoVisible(true)}
+              onError={() => setVideoVisible(false)}
+            />
           </div>
           <div className="vignette" aria-hidden="true" />
           <header>
             <a className="wordmark" href="/" aria-label="Slopik, strona główna">
-              <picture>
-                <source
-                  media="(prefers-reduced-motion: reduce)"
-                  srcSet="/assets/logo-static.webp"
-                />
-                <img
-                  src={
-                    backgroundPlaying
-                      ? "/assets/logo.webp"
-                      : "/assets/logo-static.webp"
-                  }
-                  width="350"
-                  height="350"
-                  alt="Slopik.pl"
-                  fetchPriority="high"
-                />
-              </picture>
+              <img
+                src={
+                  ambientEligible
+                    ? "/assets/logo.webp"
+                    : "/assets/logo-static.webp"
+                }
+                width="350"
+                height="350"
+                alt="Slopik.pl"
+                fetchPriority="high"
+              />
             </a>
             <div className="header-right">
               <button
@@ -370,7 +439,6 @@ export default function Slopik() {
                 onClick={toggleBackground}
                 aria-label={backgroundPlaying ? "Spauzuj tło" : "Wznów tło"}
                 title={backgroundPlaying ? "Spauzuj tło" : "Wznów tło"}
-                aria-pressed={!backgroundPlaying}
               >
                 {backgroundPlaying ? <Pause size={12} /> : <Play size={12} />}
                 <span>{backgroundPlaying ? "Spauzuj tło" : "Wznów tło"}</span>
@@ -423,15 +491,12 @@ export default function Slopik() {
                       layout
                     >
                       <div className="attachment">
-                        <img
-                          src={attachment.preview}
-                          alt="Podgląd załącznika"
-                        />
+                        <img src={attachment.preview} alt="Podgląd obrazu" />
                         <span>{attachment.name}</span>
                         <button
                           type="button"
                           className="icon-button"
-                          aria-label="Usuń załącznik"
+                          aria-label="Usuń obraz"
                           onClick={() => setAttachment(null)}
                           disabled={isLoading}
                         >
@@ -515,13 +580,11 @@ export default function Slopik() {
                         initial={{
                           opacity: 0,
                           y: reduced ? 0 : 6,
-                          filter: reduced ? "none" : "blur(3px)",
                         }}
-                        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                        animate={{ opacity: 1, y: 0 }}
                         exit={{
                           opacity: 0,
                           y: reduced ? 0 : -6,
-                          filter: reduced ? "none" : "blur(3px)",
                         }}
                         transition={{ duration: 0.16 }}
                       >

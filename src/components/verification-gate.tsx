@@ -26,13 +26,13 @@ export function VerificationGate({
   ready: boolean;
   onVerified: () => void;
 }) {
-  const container = useRef<HTMLDivElement>(null);
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const widget = useRef<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   const reduced = useReducedMotion();
   useEffect(() => {
-    if (!open || !ready || !siteKey || !container.current) return;
+    if (!open || !ready || !siteKey || !container) return;
     let cancelled = false;
     async function verify(token: string) {
       if (cancelled) return;
@@ -63,8 +63,8 @@ export function VerificationGate({
       }
     }
     const mount = () => {
-      if (cancelled || !container.current || !window.turnstile) return;
-      widget.current = window.turnstile.render(container.current, {
+      if (cancelled || !container || !window.turnstile) return;
+      widget.current = window.turnstile.render(container, {
         sitekey: siteKey,
         action: "access",
         language: "pl",
@@ -72,7 +72,7 @@ export function VerificationGate({
         callback: verify,
         "error-callback": () => {
           setFailed(true);
-          toast.error("Nie udało się wczytać weryfikacji.", {
+          toast.error("Nie udało się wczytać weryfikacji. Spróbuj ponownie.", {
             id: "verification-error",
           });
         },
@@ -85,9 +85,12 @@ export function VerificationGate({
     script.onload = mount;
     script.onerror = () => {
       setFailed(true);
-      toast.error("Sprawdź połączenie i blokadę skryptów.", {
-        id: "verification-error",
-      });
+      toast.error(
+        "Weryfikacja się nie wczytała. Sprawdź połączenie i blokadę skryptów.",
+        {
+          id: "verification-error",
+        },
+      );
     };
     if (window.turnstile) mount();
     else document.head.appendChild(script);
@@ -97,7 +100,7 @@ export function VerificationGate({
       widget.current = null;
       script.remove();
     };
-  }, [open, ready, siteKey, onVerified]);
+  }, [open, ready, siteKey, onVerified, container]);
   return (
     <Dialog.Root open={open}>
       <AnimatePresence>
@@ -127,10 +130,11 @@ export function VerificationGate({
               >
                 <Dialog.Title>Czy jesteś człowiekiem?</Dialog.Title>
                 <Dialog.Description>
-                  Weryfikujemy, aby Janusze nie użyli naszego modelu do
-                  złowieszczych celów :)
+                  Szybka kontrola od Cloudflare. Nosacz gada tylko z ludźmi.
                 </Dialog.Description>
-                <div ref={container} className="verification-widget" />
+                {ready && (
+                  <div ref={setContainer} className="verification-widget" />
+                )}
                 {busy && (
                   <div className="verification-status" role="status">
                     <LoaderCircle size={18} className="spin" /> Weryfikuję…

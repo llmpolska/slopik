@@ -1,4 +1,5 @@
 async function verify(page) {
+  const origin = new URL(page.url()).origin;
   const assert = (value, message) => {
     if (!value) throw new Error(message);
   };
@@ -21,7 +22,7 @@ async function verify(page) {
     (route) =>
       route.fulfill({
         contentType: "application/javascript",
-        body: 'window.turnstile={render:(el,o)=>{window.__testToken=o.callback;o.callback("test-token");return "test"},reset:()=>window.__testToken("test-token"),remove:()=>{}}',
+        body: 'window.turnstile={render:(el,o)=>{window.__turnstileMounts=(window.__turnstileMounts||0)+1;window.__testToken=o.callback;o.callback("test-token");return "test"},reset:()=>window.__testToken("test-token"),remove:()=>{}}',
       }),
   );
   let resolveResponse;
@@ -49,16 +50,16 @@ async function verify(page) {
       },
     });
   });
-  await page.goto("http://127.0.0.1:8787");
+  await page.goto(origin);
   await page.evaluate(() => localStorage.clear());
   await page.reload();
   await page.getByRole("textbox").fill("Kebab na abonament");
   const imageBytes = await (
-    await page.request.get("http://127.0.0.1:8787/assets/oracle.jpg")
+    await page.request.get(`${origin}/assets/oracle.webp`)
   ).body();
   await page.evaluate(async (bytes) => {
-    const file = new File([new Uint8Array(bytes)], "pasted.jpg", {
-      type: "image/jpeg",
+    const file = new File([new Uint8Array(bytes)], "pasted.webp", {
+      type: "image/webp",
     });
     const data = new DataTransfer();
     data.items.add(file);
@@ -70,8 +71,11 @@ async function verify(page) {
       }),
     );
   }, Array.from(imageBytes));
-  await page.getByAltText("Podgląd załącznika").waitFor();
+  await page.getByAltText("Podgląd obrazu").waitFor();
   await page.getByRole("button", { name: "Historia", exact: true }).click();
+  await page.waitForFunction(
+    () => document.activeElement?.getAttribute("aria-label") === "Zamknij okno",
+  );
   assert(
     !(await page.getByRole("switch").isChecked()),
     "History must default off",
@@ -161,6 +165,41 @@ async function verify(page) {
       .locator(".app")
       .evaluate((el) => el.classList.contains("background-paused")),
     "Motion toggle did not pause animation",
+  );
+  await page.unroute("**/api/verdict");
+  await page.route("**/api/verdict", (route) => {
+    verified = false;
+    return route.fulfill({
+      status: 401,
+      json: { error: "Potwierdź jeszcze raz, że jesteś człowiekiem." },
+    });
+  });
+  const mountsBefore = await page.evaluate(() => window.__turnstileMounts || 0);
+  await page.getByRole("textbox").fill("Czy sesja nadal działa?");
+  await page
+    .getByRole("button", { name: "Zapytaj nosacza", exact: true })
+    .click();
+  try {
+    await page.waitForFunction(
+      (before) => (window.__turnstileMounts || 0) > before,
+      mountsBefore,
+      { timeout: 5000 },
+    );
+  } catch {
+    const state = await page.evaluate(() => ({
+      gateOpen: !!document.querySelector(".verification-dialog"),
+      widgetPresent: !!document.querySelector(".verification-widget"),
+      mounts: window.__turnstileMounts || 0,
+    }));
+    throw new Error(
+      `Turnstile did not remount after 401: ${JSON.stringify(state)}`,
+    );
+  }
+  await page.getByRole("dialog").waitFor({ state: "hidden" });
+  assert(
+    (await page.getByRole("textbox").inputValue()) ===
+      "Czy sesja nadal działa?",
+    "Reverification discarded the draft",
   );
   await page.unrouteAll({ behavior: "wait" });
   await page.reload();

@@ -302,9 +302,6 @@ main {
 .phase-result .mascot-space {
   display: none;
 }
-.phase-result h1 {
-  font-size: clamp(1.75rem, 6dvh, 3.75rem);
-}
 h1 {
   font-family: "Outfit", sans-serif;
   font-size: clamp(2.25rem, min(7vw, 8dvh), 4.25rem);
@@ -1126,4 +1123,9 @@ footer {
     padding: 28px 12px;
     width: calc(100% - 16px);
   }
+}
+
+.app[data-phase="resetting"] .verdict-scene,
+.app[data-phase="revealing"] .composer {
+  pointer-events: none;
 }

@@ -63,16 +63,20 @@ export function HistoryDialog({
                 className={`dialog-content ${panel === "privacy" ? "privacy-dialog" : ""}`}
                 initial={{
                   opacity: 0,
-                  scale: reduced ? 1 : 0.96,
-                  y: reduced ? 0 : 10,
+
+                  y: reduced ? 0 : 4,
                 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
+                animate={{ opacity: 1, y: 0 }}
                 exit={{
                   opacity: 0,
-                  scale: reduced ? 1 : 0.98,
-                  y: reduced ? 0 : 6,
+
+                  y: 0,
+                  transition: { duration: reduced ? 0 : 0.15 },
                 }}
-                transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+                transition={{
+                  duration: reduced ? 0 : 0.25,
+                  ease: [0.23, 1, 0.32, 1],
+                }}
               >
                 <div className="dialog-top">
                   {panel === "history" && (

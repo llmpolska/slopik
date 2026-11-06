@@ -126,10 +126,16 @@ export function VerificationGate({
               <motion.section
                 ref={onElementChange}
                 className="dialog-content verification-dialog"
-                initial={{ opacity: 0, scale: reduced ? 1 : 0.97 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: reduced ? 1 : 0.98 }}
-                transition={{ duration: 0.22 }}
+                initial={{ opacity: 0, y: reduced ? 0 : 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{
+                  opacity: 0,
+                  transition: { duration: reduced ? 0 : 0.15 },
+                }}
+                transition={{
+                  duration: reduced ? 0 : 0.25,
+                  ease: [0.23, 1, 0.32, 1],
+                }}
               >
                 <Dialog.Title>Czy jesteś człowiekiem?</Dialog.Title>
                 <Dialog.Description>

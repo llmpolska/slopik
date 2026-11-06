@@ -16,10 +16,10 @@ export function VerdictCard({
   return (
     <motion.div
       className="verdict-scene"
-      initial={{ opacity: 0, y: reduced ? 0 : 12, scale: reduced ? 1 : 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: reduced ? 0 : -6, scale: reduced ? 1 : 0.99 }}
-      transition={{ duration: reduced ? 0 : 0.28, ease: [0.23, 1, 0.32, 1] }}
+      initial={{ opacity: 0, y: reduced ? 0 : 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, transition: { duration: reduced ? 0 : 0.15 } }}
+      transition={{ duration: reduced ? 0 : 0.25, ease: [0.23, 1, 0.32, 1] }}
     >
       <div className="verdict-peek" aria-hidden="true">
         <img
@@ -43,8 +43,8 @@ export function VerdictCard({
           </span>
           {verdict.kind === "idea" && (
             <motion.b
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               transition={{
                 duration: reduced ? 0 : 0.2,
                 delay: reduced ? 0 : 0.06,

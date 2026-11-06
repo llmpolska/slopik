@@ -32,6 +32,8 @@ import { attachmentBounds } from "../image";
 type Phase =
   | { kind: "idle" }
   | { kind: "loading" }
+  | { kind: "resetting" }
+  | { kind: "revealing"; verdict: Verdict; question: string }
   | { kind: "result"; verdict: Verdict; question: string };
 type Attachment = {
   name: string;
@@ -284,6 +286,7 @@ export default function Slopik() {
   async function submit() {
     if (
       (!question.trim() && !attachment) ||
+      (phase.kind !== "idle" && phase.kind !== "loading") ||
       requestInFlight.current ||
       attachmentBusy
     )
@@ -334,7 +337,7 @@ export default function Slopik() {
         return;
       }
       const { verdict } = ResultSchema.parse(body);
-      setPhase({ kind: "result", verdict, question: asked });
+      setPhase({ kind: "revealing", verdict, question: asked });
       try {
         if (localStorage.getItem("slopik.remember") === "yes") {
           const next = [
@@ -389,10 +392,11 @@ export default function Slopik() {
     }
   }
   function reset() {
+    if (phase.kind !== "result") return;
     focusOnReset.current = true;
     setQuestion("");
     setAttachment(null);
-    setPhase({ kind: "idle" });
+    setPhase({ kind: "resetting" });
   }
   function selectSample(value: string) {
     setQuestion(value);
@@ -401,10 +405,11 @@ export default function Slopik() {
   return (
     <MotionConfig
       reducedMotion="user"
-      transition={{ type: "spring", duration: 0.28, bounce: 0.08 }}
+      transition={{ type: "tween", duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
     >
       <div
-        className={`app ${ambientEligible ? "" : "background-paused"} phase-${phase.kind}`}
+        className={`app ${ambientEligible ? "" : "background-paused"} phase-${phase.kind === "resetting" ? "result" : phase.kind}`}
+        data-phase={phase.kind}
       >
         <div className="site-content" inert={!config?.verified}>
           <div className="cosmos" aria-hidden="true">
@@ -456,23 +461,35 @@ export default function Slopik() {
           <main>
             <div className="mascot-space" aria-hidden="true" />
             <section className="oracle" aria-label="Zapytaj wyrocznię">
-              <h1>
+              <motion.h1
+                layout="position"
+                transition={{ duration: reduced ? 0 : 0.2 }}
+              >
                 Nosacz prawdę
                 <br />
                 ci <span>powie.</span>
                 <svg viewBox="0 0 230 18" aria-hidden="true">
                   <path d="M4 12Q110 -3 223 8M20 17Q120 4 204 13" />
                 </svg>
-              </h1>
-              <AnimatePresence initial={false}>
-                {phase.kind !== "result" && (
+              </motion.h1>
+              <AnimatePresence
+                initial={false}
+                onExitComplete={() =>
+                  setPhase((current) =>
+                    current.kind === "revealing"
+                      ? { ...current, kind: "result" }
+                      : current,
+                  )
+                }
+              >
+                {(phase.kind === "idle" || phase.kind === "loading") && (
                   <motion.form
                     key="composer"
-                    initial={{ opacity: 0, y: reduced ? 0 : 8 }}
+                    initial={{ opacity: 0, y: reduced ? 0 : 4 }}
                     animate={{ opacity: 1, y: 0, height: "auto" }}
                     exit={{
                       opacity: 0,
-                      y: reduced ? 0 : -8,
+                      y: 0,
                       height: 0,
                       marginTop: 0,
                     }}
@@ -480,7 +497,6 @@ export default function Slopik() {
                       duration: reduced ? 0 : 0.2,
                       ease: [0.23, 1, 0.32, 1],
                     }}
-                    layout
                     className={`composer ${question || attachment ? "has-text" : ""} ${isLoading ? "is-submitting" : ""}`}
                     onSubmit={(e) => {
                       e.preventDefault();
@@ -497,10 +513,9 @@ export default function Slopik() {
                         <motion.div
                           key="attachment"
                           className="attachment-wrap"
-                          initial={{ opacity: 0, scale: 0.97 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.97 }}
-                          layout
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
                         >
                           <div className="attachment">
                             <img
@@ -580,7 +595,6 @@ export default function Slopik() {
                         )}
                       </div>
                       <motion.button
-                        layout
                         className="ask-button"
                         type="submit"
                         disabled={
@@ -588,7 +602,6 @@ export default function Slopik() {
                           isLoading ||
                           attachmentBusy
                         }
-                        whileTap={{ scale: 0.97 }}
                       >
                         <AnimatePresence initial={false} mode="popLayout">
                           <motion.span
@@ -627,7 +640,15 @@ export default function Slopik() {
                 aria-label="Wybierz obraz"
                 onChange={(e) => void attach(e.target.files?.[0])}
               />
-              <AnimatePresence initial={false} mode="wait">
+              <AnimatePresence
+                initial={false}
+                mode="wait"
+                onExitComplete={() =>
+                  setPhase((current) =>
+                    current.kind === "resetting" ? { kind: "idle" } : current,
+                  )
+                }
+              >
                 {phase.kind === "result" ? (
                   <VerdictCard
                     key="verdict"
@@ -635,7 +656,7 @@ export default function Slopik() {
                     onReset={reset}
                     onShare={() => void share()}
                   />
-                ) : (
+                ) : phase.kind === "idle" || phase.kind === "loading" ? (
                   <motion.div
                     key="suggestions"
                     className="suggestions"
@@ -659,7 +680,7 @@ export default function Slopik() {
                       ))}
                     </div>
                   </motion.div>
-                )}
+                ) : null}
               </AnimatePresence>
               <span className="sr-only" role="status" aria-live="polite">
                 {isLoading ? "Nosacz analizuje pytanie." : ""}

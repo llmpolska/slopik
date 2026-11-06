@@ -21,15 +21,17 @@ export function VerdictCard({
       exit={{ opacity: 0, y: reduced ? 0 : -6, scale: reduced ? 1 : 0.99 }}
       transition={{ duration: reduced ? 0 : 0.28, ease: [0.23, 1, 0.32, 1] }}
     >
-      <img
-        className="verdict-mascot"
-        src={mascotForVerdict(verdict)}
-        alt=""
-        aria-hidden="true"
-        draggable={false}
-        width={960}
-        height={480}
-      />
+      <div className="verdict-peek" aria-hidden="true">
+        <img
+          className="verdict-mascot"
+          src={mascotForVerdict(verdict)}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          width={960}
+          height={480}
+        />
+      </div>
       <article className="result" aria-live="polite">
         <div className="result-top">
           <span>

@@ -239,10 +239,6 @@ main {
   text-align: center;
   z-index: 1;
 }
-.phase-result .cosmos {
-  -webkit-mask-image: linear-gradient(#000 16%, transparent 42%);
-  mask-image: linear-gradient(#000 16%, transparent 42%);
-}
 .phase-result main {
   display: flex;
   flex-direction: column;
@@ -277,7 +273,14 @@ main {
   flex-direction: column;
   flex: 0 1 auto;
   min-height: 0;
-  padding-top: var(--peek-height);
+}
+.verdict-peek {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  aspect-ratio: 80 / 33;
+  flex-shrink: 0;
+  pointer-events: none;
 }
 .verdict-mascot {
   position: absolute;
@@ -285,9 +288,7 @@ main {
   top: 0;
   left: 0;
   width: 100%;
-  height: calc(var(--peek-height) + 1.5rem);
-  object-fit: contain;
-  object-position: bottom;
+  height: auto;
   pointer-events: none;
   user-select: none;
 }
@@ -296,7 +297,7 @@ main {
   flex: 0 1 auto;
   min-height: 5rem;
   margin-top: 0;
-  padding-top: clamp(1.25rem, 3dvh, 1.75rem);
+  padding-top: 2.75rem;
 }
 .phase-result .mascot-space {
   display: none;
